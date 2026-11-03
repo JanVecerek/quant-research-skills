@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# qrkit wrapper: runs the bundled CLI in its own pinned environment.
+# The environment lives in the user cache, keyed by qrkit version, so nothing is
+# installed into the user's project and plugin updates get a fresh environment.
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if ! command -v uv >/dev/null 2>&1; then
+  echo "qrkit: 'uv' is required (https://docs.astral.sh/uv/getting-started/installation/)" >&2
+  exit 127
+fi
+VERSION="$(sed -n 's/^version = "\(.*\)"/\1/p' "$ROOT/qrkit/pyproject.toml" | head -1)"
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/quant-research"
+export UV_PROJECT_ENVIRONMENT="${QRKIT_ENV:-$CACHE/qrkit-$VERSION}"
+exec uv run --quiet --frozen --no-dev --project "$ROOT/qrkit" qrkit "$@"

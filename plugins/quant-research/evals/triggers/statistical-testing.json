@@ -1,0 +1,74 @@
+[
+  {
+    "query": "is the mean of these daily strategy returns significantly above zero? returns.csv",
+    "should_trigger": true
+  },
+  {
+    "query": "give me a confidence interval for the Sharpe ratio of this backtest",
+    "should_trigger": true
+  },
+  {
+    "query": "I tested 15 signals and 2 have p < 0.05 \u2014 which ones are real?",
+    "should_trigger": true
+  },
+  {
+    "query": "is this spread stationary? run the right test",
+    "should_trigger": true
+  },
+  {
+    "query": "my returns are autocorrelated, what t-stat should I use?",
+    "should_trigger": true
+  },
+  {
+    "query": "regress strategy returns on the market with Newey-West errors",
+    "should_trigger": true
+  },
+  {
+    "query": "bootstrap the Sharpe of this return series, it's only 2 years of data",
+    "should_trigger": true
+  },
+  {
+    "query": "ADF says stationary but KPSS says not, what do I conclude?",
+    "should_trigger": true
+  },
+  {
+    "query": "Ljung-Box test on the residuals of my signal regression",
+    "should_trigger": true
+  },
+  {
+    "query": "what's the formula for standard deviation?",
+    "should_trigger": false
+  },
+  {
+    "query": "write a unit test for the returns function",
+    "should_trigger": false
+  },
+  {
+    "query": "explain p-values to a non-technical stakeholder",
+    "should_trigger": false
+  },
+  {
+    "query": "run an A/B test analysis on our website conversion data",
+    "should_trigger": false
+  },
+  {
+    "query": "compute the correlation matrix of these sector ETFs for a slide",
+    "should_trigger": false
+  },
+  {
+    "query": "fit a random forest to predict churn",
+    "should_trigger": false
+  },
+  {
+    "query": "what statistics course should I take to learn econometrics?",
+    "should_trigger": false
+  },
+  {
+    "query": "calculate the average order size per customer",
+    "should_trigger": false
+  },
+  {
+    "query": "make a histogram of daily returns",
+    "should_trigger": false
+  }
+]

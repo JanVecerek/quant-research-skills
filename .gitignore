@@ -1,0 +1,5 @@
+qr-output/
+__pycache__/
+.venv/
+.pytest_cache/
+plugins/quant-research/evals/**/results/

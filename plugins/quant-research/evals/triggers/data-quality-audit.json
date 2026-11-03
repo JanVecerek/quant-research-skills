@@ -1,0 +1,74 @@
+[
+  {
+    "query": "just got a new dump of daily prices from the vendor, check it before we use it",
+    "should_trigger": true
+  },
+  {
+    "query": "my momentum backtest is dominated by one stock that went up 50x overnight \u2014 is the data ok?",
+    "should_trigger": true
+  },
+  {
+    "query": "there are some weird -50% days in this price file, could they be splits?",
+    "should_trigger": true
+  },
+  {
+    "query": "we only have current S&P 500 constituents in this panel, is that a problem for the backtest?",
+    "should_trigger": true
+  },
+  {
+    "query": "check prices.parquet for duplicates, gaps and stale prices",
+    "should_trigger": true
+  },
+  {
+    "query": "the futures continuous series jumps every quarter on the same days, what's going on?",
+    "should_trigger": true
+  },
+  {
+    "query": "timestamps in this CSV have +01:00 offsets and some weekend dates, should I worry?",
+    "should_trigger": true
+  },
+  {
+    "query": "audit the data in data/raw before we start the pairs research",
+    "should_trigger": true
+  },
+  {
+    "query": "some closes repeat for 20 days in a row in this illiquid stock data",
+    "should_trigger": true
+  },
+  {
+    "query": "how do I read a parquet file in pandas?",
+    "should_trigger": false
+  },
+  {
+    "query": "write SQL to deduplicate rows in our users table",
+    "should_trigger": false
+  },
+  {
+    "query": "clean up the formatting of this CSV export for the client",
+    "should_trigger": false
+  },
+  {
+    "query": "what's the best data vendor for tick data?",
+    "should_trigger": false
+  },
+  {
+    "query": "validate this JSON schema for our API",
+    "should_trigger": false
+  },
+  {
+    "query": "compute daily returns from close prices",
+    "should_trigger": false
+  },
+  {
+    "query": "merge these two price files on date",
+    "should_trigger": false
+  },
+  {
+    "query": "explain what survivorship bias is in mutual fund performance studies",
+    "should_trigger": false
+  },
+  {
+    "query": "set up great_expectations for our ETL pipeline",
+    "should_trigger": false
+  }
+]

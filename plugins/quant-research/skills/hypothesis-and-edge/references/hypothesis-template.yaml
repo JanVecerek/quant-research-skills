@@ -1,0 +1,45 @@
+# hypothesis.yaml — pre-registered research hypothesis for quant-research / qrkit.
+# Every field is required. Locking (`qrkit hypothesis lock`) hashes this file;
+# any later edit creates a new hypothesis id.
+
+title: "Cross-sectional 12-1 momentum in US large caps"
+rationale: >
+  Investors under-react to firm news and then herd, so past 12-month winners
+  keep outperforming past losers over the following month.
+
+edge:
+  source: behavioural          # risk_premium | behavioural | structural
+  counterparty: "investors who sell winners too early (disposition effect) and under-react to news"
+  why_not_arbitraged: "crash risk and high turnover limit arbitrage capital"
+
+h0: "mean rank IC of the 12-1 signal against next-month returns = 0"
+h1: "mean rank IC > 0"
+metric: rank_ic              # sharpe | mean_return | rank_ic | cointegration | variance_ratio | beta
+test: momentum ic            # stats hac-mean | stats ols | meanrev engle-granger | meanrev variance-ratio | momentum ic | momentum tsmom
+alpha: 0.05
+min_effect: 0.15             # metric sharpe or mean_return: annualised Sharpe (also for a mean-return t-test); rank_ic: IC information ratio per period
+# min_sharpe: 0.5            # REQUIRED when metric is cointegration | variance_ratio | beta: power is computed for this net Sharpe
+dsr_threshold: 0.95          # deflated Sharpe needed for "effect found"
+
+data:
+  prices: data/prices.parquet      # date, asset, close (+ open, high, low, volume, contract)
+  universe: data/universe.csv      # optional: asset, start, end  (survivorship check)
+  factors: data/factors.csv        # optional: date + factor return columns (exposure check)
+periods_per_year: 252
+
+in_sample:     {start: 2005-01-03, end: 2017-12-29}
+out_of_sample: {start: 2018-01-02, end: 2023-12-29}
+
+capital: 10000000            # USD, used for square-root market impact
+costs:
+  half_spread_bps: 2         # per unit of one-way turnover
+  commission_bps: 1
+  impact_coef: 0.5           # Y in cost = Y * sigma_daily * sqrt(trade / ADV)
+  borrow_bps_annual: 50      # on short positions
+
+budget:
+  max_trials: 10             # strategy variants (distinct weight files backtested)
+kill_criteria:
+  - "in-sample rank IC test not significant at alpha"
+  - "net OOS Sharpe 95% CI includes 0"
+  - "break-even cost below 2x the assumed cost"

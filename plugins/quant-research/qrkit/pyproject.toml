@@ -1,0 +1,31 @@
+[project]
+name = "qrkit"
+version = "0.1.0"
+description = "Deterministic computations for the quant-research Claude Code plugin"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+  "numpy>=1.26",
+  "pandas>=2.1",
+  "pyarrow>=14",
+  "scipy>=1.11",
+  "statsmodels>=0.14.1",
+  "arch>=6.3",
+  "pyyaml>=6",
+]
+
+[project.scripts]
+qrkit = "qrkit.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qrkit"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
