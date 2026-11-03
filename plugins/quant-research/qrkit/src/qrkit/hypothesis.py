@@ -46,6 +46,7 @@ REQUIRED = {
     "budget": dict,
     "kill_criteria": list,
 }
+NON_SHARPE_METRICS = {"cointegration", "variance_ratio", "beta"}
 COST_KEYS = ["half_spread_bps", "commission_bps", "impact_coef", "borrow_bps_annual"]
 
 
@@ -160,6 +161,13 @@ def validate_spec(spec: dict) -> list[str]:
         errs.append("budget.max_trials is required (research budget)")
     if not all(isinstance(x, str) and x.strip() for x in spec["kill_criteria"]):
         errs.append("kill_criteria must be a list of non-empty strings")
+    if spec["metric"] in NON_SHARPE_METRICS:
+        try:
+            if float(spec.get("min_sharpe", 0)) <= 0:
+                raise ValueError
+        except (TypeError, ValueError):
+            errs.append(f"metric '{spec['metric']}' has no natural effect size for power: add min_sharpe "
+                        "(smallest annualised net Sharpe worth trading); power is computed for it")
     thr = spec.get("dsr_threshold", 0.95)
     if not 0.5 <= float(thr) < 1:
         errs.append("dsr_threshold must be in [0.5, 1)")
@@ -181,6 +189,11 @@ def power_analysis(spec: dict, n_is: int) -> dict:
     if spec["metric"] in ("sharpe", "mean_return"):
         per = eff / np.sqrt(ppy)
         note = "min_effect read as annualised Sharpe ratio"
+    elif spec["metric"] in NON_SHARPE_METRICS:
+        eff = float(spec["min_sharpe"])
+        per = eff / np.sqrt(ppy)
+        note = (f"metric '{spec['metric']}' has no standard power formula: power is for detecting the strategy's "
+                f"net Sharpe min_sharpe = {eff} over the in-sample window")
     else:
         per = eff
         note = "min_effect read as standardised effect per period (e.g. IC information ratio per period)"
@@ -190,7 +203,8 @@ def power_analysis(spec: dict, n_is: int) -> dict:
     # sample size for 80% power
     z_b = st.norm.ppf(0.8)
     n80 = int(np.ceil(((z_a + z_b) / per) ** 2)) if per > 0 else None
-    mde = float((z_a + z_b) / np.sqrt(n_is) * (np.sqrt(ppy) if spec["metric"] in ("sharpe", "mean_return") else 1)) if n_is > 0 else None
+    sharpe_units = spec["metric"] in ("sharpe", "mean_return") or spec["metric"] in NON_SHARPE_METRICS
+    mde = float((z_a + z_b) / np.sqrt(n_is) * (np.sqrt(ppy) if sharpe_units else 1)) if n_is > 0 else None
     return {
         "n_in_sample_periods": int(n_is),
         "power_at_min_effect": power,
@@ -202,12 +216,12 @@ def power_analysis(spec: dict, n_is: int) -> dict:
 
 
 def count_is_periods(spec: dict, base: Path) -> int:
-    from .io import load_prices
+    from .io import load_prices_raw
 
     p = Path(spec["data"]["prices"])
     if not p.exists() and (base / p).exists():
         p = base / p
-    prices = load_prices(p)
+    prices = load_prices_raw(p)  # raw: the audit, not the check, judges data quality
     lo, hi = pd.Timestamp(spec["in_sample"]["start"]), pd.Timestamp(spec["in_sample"]["end"])
     d = prices["date"]
     return int(d[(d >= lo) & (d <= hi)].nunique()) - 1

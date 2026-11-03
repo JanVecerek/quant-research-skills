@@ -15,7 +15,7 @@ def _dates(n: int) -> pd.DatetimeIndex:
     return pd.bdate_range("2010-01-04", periods=n)
 
 
-def ou_pair(rng, n=3000, half_life=10.0, sigma=0.01, beta=1.0):
+def ou_pair(rng, n=3000, half_life=5.0, sigma=0.02, beta=1.0):
     theta = np.log(2) / half_life
     phi = np.exp(-theta)
     s = np.zeros(n)
@@ -89,7 +89,7 @@ def hypothesis_template(kind: str, dates: pd.DatetimeIndex) -> dict:
         "in_sample": {"start": str(dates[0].date()), "end": str(is_end.date())},
         "out_of_sample": {"start": str(oos_start.date()), "end": str(dates[-1].date())},
         "capital": 1_000_000,
-        "costs": {"half_spread_bps": 2, "commission_bps": 1, "impact_coef": 0.1, "borrow_bps_annual": 50},
+        "costs": {"half_spread_bps": 2, "commission_bps": 1, "impact_coef": 0.5, "borrow_bps_annual": 50},
         "budget": {"max_trials": 10},
         "dsr_threshold": 0.95,
     }
@@ -101,7 +101,7 @@ def hypothesis_template(kind: str, dates: pd.DatetimeIndex) -> dict:
                      "why_not_arbitraged": "capacity is small and holding periods of weeks tie up capital"},
             "h0": "log(AAA) and log(BBB) are not cointegrated",
             "h1": "log(AAA) - beta log(BBB) is stationary in both regression directions",
-            "metric": "cointegration", "test": "meanrev engle-granger", "min_effect": 0.1,
+            "metric": "cointegration", "test": "meanrev engle-granger", "min_effect": 0.1, "min_sharpe": 1.0,
             "kill_criteria": ["Engle-Granger not significant in both directions in-sample",
                               "net OOS Sharpe CI includes 0", "half-life longer than 60 bars"],
         })

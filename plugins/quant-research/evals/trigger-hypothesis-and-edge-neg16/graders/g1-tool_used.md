@@ -1,0 +1,8 @@
+---
+type: "tool_used"
+tool: "Skill"
+input_match: "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?hypothesis-and-edge\""
+max: 0
+arm: "both"
+---
+

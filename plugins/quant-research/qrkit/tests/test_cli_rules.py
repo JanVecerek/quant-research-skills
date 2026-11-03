@@ -116,3 +116,20 @@ def test_identical_output_hashes_on_rerun(workdir, capsys):
         return hashes
 
     assert run_all() == run_all()
+
+
+def test_report_stops_before_oos_when_test_fails(workdir, capsys):
+    _hyp(workdir)
+    main(["hypothesis", "lock"]); capsys.readouterr()
+    main(["audit"]); capsys.readouterr()
+    d = pd.bdate_range("2015-01-01", periods=600)
+    rng = np.random.default_rng(3)
+    pd.DataFrame({"date": d, "net": rng.normal(-0.001, 0.01, 600)}).to_csv(workdir / "r.csv", index=False)
+    main(["stats", "hac-mean", "--series", "r.csv", "--column", "net"])
+    test_file = _out(capsys)["output_file"]
+    assert main(["report"]) == 0
+    rep = _out(capsys)
+    assert rep["conclusion"] in ("no effect", "inconclusive")
+    assert not any("out-of-sample" in r for r in rep["reasons"])  # OOS not required once the test failed
+    doc = json.loads(Path(rep["output_file"]).read_text())
+    assert doc["result"]["sources"]["test"] == test_file

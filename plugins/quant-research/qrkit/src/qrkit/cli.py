@@ -19,6 +19,26 @@ from .io import (ContractError, RuleError, Run, append_trial, close_matrix, dump
                  load_series, load_weights, output_dir, read_table, require_seed)
 
 
+RELEVANT = {
+    "meanrev engle-granger": ["a", "b", "levels"],
+    "meanrev hedge-ratio": ["a", "b", "levels", "mode", "fit", "formation", "window", "refit_every"],
+    "meanrev zscore": ["hedge", "window"],
+    "meanrev pairs-weights": ["zscore", "entry", "exit", "stop"],
+    "meanrev variance-ratio": ["series", "column", "asset", "transform", "lags"],
+    "meanrev half-life": ["series", "column", "asset", "transform", "holding_period"],
+    "momentum signal": ["kind", "lookback", "skip"],
+    "momentum portfolio": ["signal", "kind", "quantiles", "holding", "rebalance", "target_vol", "min_dollar_volume"],
+    "momentum ic": ["signal", "horizon", "step"],
+    "momentum tsmom": ["lookback_periods", "skip_periods", "period"],
+}
+
+
+def _params(cmd: str, args) -> dict:
+    """Only the parameters that affect this command, so output files document the real chain."""
+    keys = RELEVANT[cmd]
+    return {k: getattr(args, k) for k in keys if getattr(args, k, None) is not None}
+
+
 def emit(path: Path, result: dict, keys: list[str] | None = None) -> None:
     show = {k: result[k] for k in keys if k in result} if keys else result
     print(dumps({"output_file": str(path), **show}))
@@ -187,7 +207,7 @@ def cmd_stats(args):
 def cmd_meanrev(args):
     h = _h(args)
     m = args.method_name
-    params = {k: v for k, v in vars(args).items() if k not in ("func", "hypothesis") and v is not None}
+    params = _params(f"meanrev {m}", args)
     inputs = {"hypothesis": args.hypothesis, "prices": h.data_path("prices")}
     run = None
     if m in ("engle-granger", "hedge-ratio"):
@@ -259,7 +279,7 @@ def cmd_meanrev(args):
 def cmd_momentum(args):
     h = _h(args)
     m = args.method_name
-    params = {k: v for k, v in vars(args).items() if k not in ("func", "hypothesis") and v is not None}
+    params = _params(f"momentum {m}", args)
     inputs = {"hypothesis": args.hypothesis, "prices": h.data_path("prices")}
     prices = _is_prices(h)
     P = close_matrix(prices)
@@ -397,7 +417,7 @@ def cmd_validate(args):
         bt = bt[(bt.index >= h.oos_window[0]) & (bt.index <= h.oos_window[1])]
         if len(bt) < 20:
             raise ContractError("fewer than 20 OOS periods with positions: check the weights cover the OOS window")
-        res = {"oos": validate.oos_result(bt["net"], h.alpha, h.ppy), "summary": bt_mod.summarize(bt, h.ppy),
+        res = {"oos": validate.oos_result(bt["net"], h.alpha, h.ppy), "summary": bt_mod.summarize(bt, h.ppy, bt_mod.market_proxy(P)),
                "window": [h.oos_window[0], h.oos_window[1]], "one_time": True, "replayed_chain": chain}
         run = Run("validate oos", {"from": args.from_output}, {"hypothesis": args.hypothesis, "weights": str(wpath), "prices": h.data_path("prices")}, h.id)
         res["returns_file"] = str(_write_series(run, bt, "oos-returns"))

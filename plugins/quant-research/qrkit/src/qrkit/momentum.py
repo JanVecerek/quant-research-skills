@@ -25,7 +25,7 @@ def past_return(close: pd.DataFrame, lookback: int, skip: int) -> pd.DataFrame:
 
 def signal(close: pd.DataFrame, kind: str, lookback: int, skip: int, ppy: int = 252) -> tuple[pd.DataFrame, list[str]]:
     errors = []
-    if skip == 0:
+    if skip == 0 and kind == "xs":
         errors.append(
             "momentum signal without skip period: the latest bar(s) carry short-term reversal and bid-ask bounce "
             "(Jegadeesh & Titman 1993 skip one month; 12-1 = lookback 231, skip 21 on daily data)"

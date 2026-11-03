@@ -1,0 +1,12 @@
+{
+  "name": "quant-research",
+  "description": "Quantitative research plugins for Claude Code",
+  "owner": { "name": "Honza Večerek" },
+  "plugins": [
+    {
+      "name": "quant-research",
+      "source": "./plugins/quant-research",
+      "description": "Skills, a read-only reviewer subagent and the qrkit CLI for false-discovery-resistant quant research."
+    }
+  ]
+}

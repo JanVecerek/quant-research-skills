@@ -116,6 +116,17 @@ def audit(prices_path, universe_path=None, factors_path=None, outlier_z=10.0, st
     else:
         checks.append(_chk("invalid_ohlc", SKIP, "no open/high/low columns"))
 
+    # volume: needed for square-root market impact (shares traded per bar)
+    if "volume" in df.columns:
+        v = df["volume"]
+        bad = df[(v.isna()) | (v <= 0)]
+        checks.append(_chk("volume", WARN if len(bad) else PASS,
+                           f"{len(bad)} rows with missing or non-positive volume; impact cost uses volume as shares traded per bar "
+                           f"(median daily dollar volume {float((df['close'] * v).median()):,.0f})",
+                           [f"{r.asset} {r.date.date()}" for r in bad.head(10).itertuples()]))
+    else:
+        checks.append(_chk("volume", WARN, "no volume column: market impact cannot be modelled (cost_impact will be 0)"))
+
     # time zones / timestamps
     times = raw["date"].dt.time.astype(str)
     has_time = (times != "00:00:00").any()

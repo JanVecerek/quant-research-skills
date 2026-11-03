@@ -1,0 +1,74 @@
+[
+  {
+    "query": "test whether GLD and GDX are cointegrated and build a pairs strategy",
+    "should_trigger": true
+  },
+  {
+    "query": "build a 12-1 cross-sectional momentum strategy on this stock panel",
+    "should_trigger": true
+  },
+  {
+    "query": "what's the half-life of mean reversion of this spread?",
+    "should_trigger": true
+  },
+  {
+    "query": "set up a time-series momentum (trend following) test on these futures",
+    "should_trigger": true
+  },
+  {
+    "query": "compute the rank IC of my momentum signal against next-month returns",
+    "should_trigger": true
+  },
+  {
+    "query": "my pairs trade uses a hedge ratio from regressing on the whole sample, is that ok?",
+    "should_trigger": true
+  },
+  {
+    "query": "build quintile long-short portfolios from this signal with overlapping holding periods",
+    "should_trigger": true
+  },
+  {
+    "query": "should my momentum signal skip the last month?",
+    "should_trigger": true
+  },
+  {
+    "query": "rolling vs static hedge ratio for a stat arb pair \u2014 how to test both properly",
+    "should_trigger": true
+  },
+  {
+    "query": "explain what momentum means in physics",
+    "should_trigger": false
+  },
+  {
+    "query": "write a function to compute RSI and MACD for a charting app",
+    "should_trigger": false
+  },
+  {
+    "query": "what is a pair programming session?",
+    "should_trigger": false
+  },
+  {
+    "query": "show me the top 10 gainers today",
+    "should_trigger": false
+  },
+  {
+    "query": "implement a moving average crossover indicator for TradingView",
+    "should_trigger": false
+  },
+  {
+    "query": "summarise a book on trend following for my reading notes",
+    "should_trigger": false
+  },
+  {
+    "query": "what does mean reversion mean in plain English?",
+    "should_trigger": false
+  },
+  {
+    "query": "draw the efficient frontier for these 5 assets",
+    "should_trigger": false
+  },
+  {
+    "query": "build a Kalman filter for tracking a drone's position",
+    "should_trigger": false
+  }
+]

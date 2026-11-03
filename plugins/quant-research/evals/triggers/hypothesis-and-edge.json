@@ -1,0 +1,74 @@
+[
+  {
+    "query": "Before we test it: why would a short-term reversal strategy in crypto make money, and who's on the other side?",
+    "should_trigger": true
+  },
+  {
+    "query": "help me write the hypothesis.yaml for the earnings-drift idea",
+    "should_trigger": true
+  },
+  {
+    "query": "I want to test whether high-dividend stocks outperform \u2014 set up the hypothesis properly first",
+    "should_trigger": true
+  },
+  {
+    "query": "is this edge a risk premium or behavioural? It's selling 1-week OTM puts on SPX",
+    "should_trigger": true
+  },
+  {
+    "query": "my backtest shows a daily Sharpe of 3.4, does that seem plausible?",
+    "should_trigger": true
+  },
+  {
+    "query": "the strategy dies when I add a one-day execution lag, what does that mean?",
+    "should_trigger": true
+  },
+  {
+    "query": "can I just change the in-sample end date to 2019 in the locked hypothesis?",
+    "should_trigger": true
+  },
+  {
+    "query": "what's a realistic Sharpe for a cross-sectional value strategy, and what should my minimum effect be?",
+    "should_trigger": true
+  },
+  {
+    "query": "pre-register the hypothesis for the index rebalancing front-running idea",
+    "should_trigger": true
+  },
+  {
+    "query": "what is a hypothesis test, in general terms?",
+    "should_trigger": false
+  },
+  {
+    "query": "write a YAML config for our airflow DAG",
+    "should_trigger": false
+  },
+  {
+    "query": "summarise the Fama-French 1993 paper",
+    "should_trigger": false
+  },
+  {
+    "query": "compute the Sharpe ratio of this returns column",
+    "should_trigger": false
+  },
+  {
+    "query": "rename the columns in hypothesis_results.csv",
+    "should_trigger": false
+  },
+  {
+    "query": "what does the term 'counterparty risk' mean for OTC derivatives?",
+    "should_trigger": false
+  },
+  {
+    "query": "draft an email to my PM summarising last week's P&L",
+    "should_trigger": false
+  },
+  {
+    "query": "make the plots in the momentum notebook prettier",
+    "should_trigger": false
+  },
+  {
+    "query": "explain the efficient market hypothesis for an exam",
+    "should_trigger": false
+  }
+]

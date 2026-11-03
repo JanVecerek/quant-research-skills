@@ -1,0 +1,74 @@
+[
+  {
+    "query": "I have a hunch that stocks with rising short interest underperform next month. Can you figure out if that actually works on data/panel.parquet?",
+    "should_trigger": true
+  },
+  {
+    "query": "my PM wants a go/no-go on the KO/PEP pairs idea by tonight, prices are in prices.csv",
+    "should_trigger": true
+  },
+  {
+    "query": "Does buying the S&P after three down days make money? Daily data in spx.csv, 2000-2024",
+    "should_trigger": true
+  },
+  {
+    "query": "write up the final research report for the carry strategy we tested in qr-output/",
+    "should_trigger": true
+  },
+  {
+    "query": "we've tried 9 variants of this vol-targeted trend signal, should we kill it or keep going?",
+    "should_trigger": true
+  },
+  {
+    "query": "backtest my mean-reversion idea on the sector ETFs and tell me if it's real",
+    "should_trigger": true
+  },
+  {
+    "query": "is there an anomaly in month-end returns for European small caps? data in data/eu_small.csv",
+    "should_trigger": true
+  },
+  {
+    "query": "here's a factor I built (factor.csv) \u2014 does it predict returns, and is it worth trading?",
+    "should_trigger": true
+  },
+  {
+    "query": "can you test whether overnight returns predict intraday returns in this futures dataset?",
+    "should_trigger": true
+  },
+  {
+    "query": "write a pandas function that resamples daily prices to weekly OHLC",
+    "should_trigger": false
+  },
+  {
+    "query": "explain what a Sharpe ratio is to a new analyst",
+    "should_trigger": false
+  },
+  {
+    "query": "fix the bug in our backtest engine where dates are parsed as strings",
+    "should_trigger": false
+  },
+  {
+    "query": "plot the cumulative return of SPY from this CSV",
+    "should_trigger": false
+  },
+  {
+    "query": "what's the difference between cointegration and correlation? just conceptually",
+    "should_trigger": false
+  },
+  {
+    "query": "set up a pytest fixture for our trading library",
+    "should_trigger": false
+  },
+  {
+    "query": "summarise this earnings call transcript for NVDA",
+    "should_trigger": false
+  },
+  {
+    "query": "build a dashboard showing our live strategy P&L from the database",
+    "should_trigger": false
+  },
+  {
+    "query": "convert this R script that computes rolling betas to Python",
+    "should_trigger": false
+  }
+]

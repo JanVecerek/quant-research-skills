@@ -39,12 +39,16 @@ def build(h: Hypothesis, overrides: dict[str, str | None], review: str | None, i
     outs = latest_outputs(h.id)
     spec = h.spec
 
+    used: dict[str, str] = {}
+
     def pick(step: str) -> dict | None:
         if overrides.get(step):
+            used[step] = overrides[step]
             return _load(overrides[step])
         cmds = [spec["test"]] if step == "test" else STEP_COMMANDS[step]
         for c in cmds:
             if outs.get(c):
+                used[step] = outs[c][-1]
                 return _load(outs[c][-1])
         return None
 
@@ -68,7 +72,22 @@ def build(h: Hypothesis, overrides: dict[str, str | None], review: str | None, i
     oos_pass = bool(oos and oos["result"]["oos"]["passed"])
     powered = bool(power.get("adequate"))
 
-    if missing or not audit_ok:
+    test_failed_powered = test is not None and not test_pass and audit_ok
+    if test_failed_powered:
+        # the pre-registered test failed: "effect found" is impossible, so later steps (and spending
+        # the OOS window) cannot change the conclusion
+        missing = [m for m in missing if m not in ("backtest", "in-sample validation (DSR)", "out-of-sample validation")]
+        if missing:
+            conclusion = "inconclusive"
+            reasons.append(f"steps missing: {missing}")
+        elif powered:
+            conclusion = "no effect"
+            reasons.append(f"pre-registered in-sample test failed (p = {test_p:.4g} >= alpha {alpha}) with adequate power")
+        else:
+            conclusion = "inconclusive"
+            reasons.append(f"pre-registered in-sample test failed (p = {test_p:.4g}) but power at the minimum effect is "
+                           f"{power.get('power_at_min_effect', 0):.2f} < 0.80: not evidence of no effect")
+    elif missing or not audit_ok:
         conclusion = "inconclusive"
         if missing:
             reasons.append(f"steps missing: {missing}")
@@ -79,7 +98,7 @@ def build(h: Hypothesis, overrides: dict[str, str | None], review: str | None, i
         reasons.append(f"in-sample power {power.get('power_at_min_effect', 0):.2f} < 0.80 at the minimum effect: a negative result is not evidence of no effect")
     else:
         conclusion = "no effect"
-    if conclusion != "effect found" and not missing and audit_ok:
+    if conclusion != "effect found" and not missing and audit_ok and not test_failed_powered:
         reasons += [f"in-sample test p = {test_p:.4g} vs alpha {alpha}" + (" (pass)" if test_pass else " (fail)"),
                     f"deflated Sharpe {dsr:.3f} vs threshold {h.dsr_threshold}" + (" (pass)" if dsr_pass else " (fail)"),
                     "OOS " + ("pass" if oos_pass else "fail")]
@@ -130,7 +149,7 @@ def build(h: Hypothesis, overrides: dict[str, str | None], review: str | None, i
                 "gross": oos["result"]["summary"]["gross"], "net": oos["result"]["summary"]["net"]} if oos else None,
         "exposure": {"status": ex["result"]["status"], "alpha_t": ex["result"]["alpha_t"], "note": ex["result"]["note"]} if ex else {"status": "WARN", "note": "exposure not checked"},
         "review_status": review_status,
-        "sources": {k: v[-1] for k, v in outs.items()},
+        "sources": used,
     }
     md = render_md(computed, review_doc, Path(interpretation).read_text() if interpretation and Path(interpretation).exists() else None)
     return computed, md
@@ -166,7 +185,7 @@ def render_md(c: dict, review: str | None, interp: str | None) -> str:
         L.append(f"- In-sample Sharpe gross {_f(g['sharpe_annualised'])} {_f(g['sharpe_ci_95_hac'])}, net {_f(n['sharpe_annualised'])} {_f(n['sharpe_ci_95_hac'])}; break-even cost {_f(c['in_sample_backtest']['break_even_cost_bps'], 1)} bps")
     if c["oos"]:
         o = c["oos"]
-        L.append(f"- OOS net Sharpe {_f(o['sharpe_annualised_net'])}, 95% CI {_f(o['sharpe_ci_95'])}; gross Sharpe {_f(o['gross']['sharpe_annualised'])}; {'PASS' if o['passed'] else 'FAIL'}")
+        L.append(f"- OOS net Sharpe {_f(o['sharpe_annualised_net'])}, 95% CI {_f(o['sharpe_ci_95'])}; gross Sharpe {_f(o['gross']['sharpe_annualised'])} {_f(o['gross']['sharpe_ci_95_hac'])}; {'PASS' if o['passed'] else 'FAIL'}")
     L.append(f"- Exposure: {c['exposure']['status']} — {c['exposure']['note']}")
     L += ["", "### Source files", ""] + [f"- `{k}`: `{v}`" for k, v in sorted(c["sources"].items())]
     L += ["", "## Reviewer findings", "", review.strip() if review else "_Not attached._", ""]

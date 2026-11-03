@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: outcome-full-sample-hedge
+context:
+  scaffold_script: scaffold.sh

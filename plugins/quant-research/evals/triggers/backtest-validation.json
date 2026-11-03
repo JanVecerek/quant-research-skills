@@ -1,0 +1,74 @@
+[
+  {
+    "query": "here are my target weights from our engine (weights.parquet) \u2014 compute gross and net returns",
+    "should_trigger": true
+  },
+  {
+    "query": "add transaction costs and market impact to this backtest and tell me the break-even cost",
+    "should_trigger": true
+  },
+  {
+    "query": "how many trials did we run, and what's the deflated Sharpe?",
+    "should_trigger": true
+  },
+  {
+    "query": "run the out-of-sample validation now that the strategy is frozen",
+    "should_trigger": true
+  },
+  {
+    "query": "is this long-short return just market beta? check the exposure",
+    "should_trigger": true
+  },
+  {
+    "query": "walk-forward test the strategy across the in-sample period",
+    "should_trigger": true
+  },
+  {
+    "query": "the backtest ignores borrow costs on the short leg, fix that",
+    "should_trigger": true
+  },
+  {
+    "query": "probabilistic Sharpe ratio for this strategy please",
+    "should_trigger": true
+  },
+  {
+    "query": "I ran OOS once and it failed, can I tweak and run OOS again?",
+    "should_trigger": true
+  },
+  {
+    "query": "backtest the new database migration on staging",
+    "should_trigger": false
+  },
+  {
+    "query": "what's the difference between validation and test sets in deep learning?",
+    "should_trigger": false
+  },
+  {
+    "query": "cross-validate this sklearn classifier",
+    "should_trigger": false
+  },
+  {
+    "query": "compute brokerage fees for my personal trades last year for taxes",
+    "should_trigger": false
+  },
+  {
+    "query": "write the deployment checklist for the trading app",
+    "should_trigger": false
+  },
+  {
+    "query": "optimise the speed of our backtest loop with numba",
+    "should_trigger": false
+  },
+  {
+    "query": "explain what market impact means for a journalist",
+    "should_trigger": false
+  },
+  {
+    "query": "load the weights of this PyTorch model",
+    "should_trigger": false
+  },
+  {
+    "query": "validate the user input form on the website",
+    "should_trigger": false
+  }
+]

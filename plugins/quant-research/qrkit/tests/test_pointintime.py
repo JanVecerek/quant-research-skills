@@ -60,3 +60,9 @@ def test_backtest_returns(closes):
 def test_missing_skip_is_flagged(closes):
     _, errors = momentum.signal(closes, "xs", 231, 0)
     assert errors and "skip period" in errors[0]
+
+
+def test_tsmom_without_skip_is_allowed(closes):
+    """Moskowitz-Ooi-Pedersen time-series momentum uses no skip period."""
+    _, errors = momentum.signal(closes, "ts", 252, 0)
+    assert errors == []

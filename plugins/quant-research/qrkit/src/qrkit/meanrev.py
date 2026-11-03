@@ -43,6 +43,8 @@ def engle_granger(a: pd.Series, b: pd.Series, alpha: float = 0.05) -> dict:
                "direction-dependent result: treat as not cointegrated" if either else "not cointegrated")
     return {"test": "Engle-Granger (MacKinnon critical values), both directions", "h0": "no cointegration",
             "results": res, "p_value": max(res["a_on_b"]["p_value"], res["b_on_a"]["p_value"]),
+            "statistic": max(res["a_on_b"]["statistic"], res["b_on_a"]["statistic"]),
+            "statistic_note": "the weaker (less negative) of the two directions; p_value is the larger of the two",
             "verdict": verdict, "alpha": alpha, "n": int(len(df)),
             "reference": "Engle & Granger (1987); MacKinnon (2010) critical values"}
 
