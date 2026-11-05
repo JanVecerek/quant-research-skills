@@ -53,6 +53,23 @@ def sha256_text(text: str) -> str:
 # --------------------------------------------------------------------------- JSON
 
 
+def _timestamp_str(obj: Any) -> str:
+    """Midnight -> YYYY-MM-DD (daily outputs unchanged); otherwise ISO YYYY-MM-DDTHH:MM:SS.
+
+    tz-aware values are converted to UTC first. Sub-second parts, if any, are kept.
+    """
+    ts = pd.Timestamp(obj)
+    if ts is pd.NaT:
+        return "NaT"
+    if ts.tz is not None:
+        ts = ts.tz_convert("UTC").tz_localize(None)
+    if ts == ts.normalize():
+        return ts.strftime("%Y-%m-%d")
+    if ts.microsecond or ts.nanosecond:
+        return ts.isoformat()
+    return ts.strftime("%Y-%m-%dT%H:%M:%S")
+
+
 def _clean(obj: Any) -> Any:
     if isinstance(obj, dict):
         return {str(k): _clean(v) for k, v in obj.items()}
@@ -67,8 +84,8 @@ def _clean(obj: Any) -> Any:
         if math.isnan(x) or math.isinf(x):
             return None
         return float(f"{x:.12g}")  # stable across tiny float noise
-    if isinstance(obj, (pd.Timestamp, _dt.date)):
-        return str(pd.Timestamp(obj).date())
+    if isinstance(obj, (pd.Timestamp, _dt.date, np.datetime64)):
+        return _timestamp_str(obj)
     if isinstance(obj, Path):
         return str(obj)
     return obj
