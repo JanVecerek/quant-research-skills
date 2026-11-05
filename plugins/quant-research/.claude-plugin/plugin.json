@@ -1,6 +1,6 @@
 {
   "name": "quant-research",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Disciplined quantitative research for Claude Code: pre-registered hypotheses, data audits, correct tests, out-of-sample validation and costs, with every number computed by the bundled qrkit CLI.",
   "author": { "name": "Honza Večerek" },
   "license": "MIT",
