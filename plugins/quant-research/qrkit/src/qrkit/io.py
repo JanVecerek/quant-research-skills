@@ -205,6 +205,41 @@ def _parse_dates(df: pd.DataFrame, path: str | Path, col: str = "date") -> pd.Se
     return d
 
 
+# --------------------------------------------------------------------------- windows
+
+
+def _naive_utc(value: Any) -> pd.Timestamp:
+    ts = pd.Timestamp(value)
+    if ts.tz is not None:
+        ts = ts.tz_convert("UTC").tz_localize(None)
+    return ts
+
+
+def effective_end(end: Any) -> pd.Timestamp:
+    """Last instant covered by a window end, inclusive.
+
+    A date-only end (no time component, i.e. midnight) means the whole calendar
+    day: it covers every bar before the next midnight (``date < end + 1 day``).
+    An end with an explicit time is inclusive as written. Dates in the data are
+    naive UTC (see ``_parse_dates``), so tz-aware bounds are converted to UTC first.
+    """
+    ts = _naive_utc(end)
+    if ts == ts.normalize():
+        return ts + pd.Timedelta(days=1) - pd.Timedelta(1, "ns")
+    return ts
+
+
+def in_window(dates: pd.Series | pd.DatetimeIndex, window: tuple) -> Any:
+    """Boolean mask of `dates` inside `window` = (start, end).
+
+    The single place that defines window membership: start inclusive as
+    written, end per :func:`effective_end`. Daily data is unaffected (one bar
+    per day at midnight); intraday data keeps every bar of the end day.
+    """
+    lo, hi = _naive_utc(window[0]), effective_end(window[1])
+    return (dates >= lo) & (dates <= hi)
+
+
 PRICE_REQUIRED = ["date", "asset", "close"]
 PRICE_OPTIONAL = ["open", "high", "low", "volume", "contract"]
 
@@ -245,8 +280,7 @@ def load_prices(path: str | Path, window: tuple | None = None) -> pd.DataFrame:
         raise ContractError(f"{path}: non-positive close prices. Run `qrkit audit`.")
     df = df.sort_values(["asset", "date"]).reset_index(drop=True)
     if window is not None:
-        lo, hi = window
-        df = df[(df["date"] >= lo) & (df["date"] <= hi)]
+        df = df[in_window(df["date"], window)]
     return df.drop(columns=["date_raw"])
 
 
@@ -292,7 +326,7 @@ def load_series(path: str | Path, column: str | None = None, window: tuple | Non
     if s.index.duplicated().any():
         raise ContractError(f"{path}: duplicate dates in series")
     if window is not None:
-        s = s[(s.index >= window[0]) & (s.index <= window[1])]
+        s = s[in_window(s.index, window)]
     return s.dropna()
 
 
@@ -320,5 +354,5 @@ def load_factors(path: str | Path, window: tuple | None = None) -> pd.DataFrame:
         raise ContractError(f"{path}: no numeric factor columns")
     df = df[cols]
     if window is not None:
-        df = df[(df.index >= window[0]) & (df.index <= window[1])]
+        df = df[in_window(df.index, window)]
     return df
