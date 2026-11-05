@@ -15,7 +15,7 @@ import pandas as pd
 import yaml
 from scipy import stats as st
 
-from .io import ContractError, RuleError, Run, dumps, output_dir, read_trials, sha256_file
+from .io import ContractError, RuleError, Run, dumps, effective_end, output_dir, read_trials, sha256_file
 
 EDGE_SOURCES = {"risk_premium", "behavioural", "structural"}
 METRICS = {"sharpe", "mean_return", "rank_ic", "cointegration", "variance_ratio", "beta"}
@@ -148,7 +148,7 @@ def validate_spec(spec: dict) -> list[str]:
             errs.append("in_sample.start must be before in_sample.end")
         if not o0 < o1:
             errs.append("out_of_sample.start must be before out_of_sample.end")
-        if not i1 < o0:
+        if not effective_end(i1) < o0:
             errs.append("out_of_sample must start after in_sample ends (no overlap)")
     except (KeyError, TypeError, ValueError):
         errs.append("in_sample and out_of_sample need start and end dates (YYYY-MM-DD)")
@@ -216,15 +216,14 @@ def power_analysis(spec: dict, n_is: int) -> dict:
 
 
 def count_is_periods(spec: dict, base: Path) -> int:
-    from .io import load_prices_raw
+    from .io import in_window, load_prices_raw
 
     p = Path(spec["data"]["prices"])
     if not p.exists() and (base / p).exists():
         p = base / p
     prices = load_prices_raw(p)  # raw: the audit, not the check, judges data quality
-    lo, hi = pd.Timestamp(spec["in_sample"]["start"]), pd.Timestamp(spec["in_sample"]["end"])
     d = prices["date"]
-    return int(d[(d >= lo) & (d <= hi)].nunique()) - 1
+    return int(d[in_window(d, (spec["in_sample"]["start"], spec["in_sample"]["end"]))].nunique()) - 1
 
 
 def check(path: str | Path) -> tuple[dict, list[str]]:

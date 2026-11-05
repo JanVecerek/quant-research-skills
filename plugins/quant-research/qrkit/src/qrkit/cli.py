@@ -15,8 +15,8 @@ from . import audit as audit_mod
 from . import backtest as bt_mod
 from . import hypothesis as hyp
 from . import meanrev, momentum, report, stats, synth, validate
-from .io import (ContractError, RuleError, Run, append_trial, close_matrix, dumps, load_factors, load_prices,
-                 load_series, load_weights, output_dir, read_table, require_seed)
+from .io import (ContractError, RuleError, Run, append_trial, close_matrix, dumps, in_window, load_factors,
+                 load_prices, load_series, load_weights, output_dir, read_table, require_seed)
 
 
 RELEVANT = {
@@ -239,7 +239,7 @@ def cmd_meanrev(args):
     elif m == "zscore":
         inputs["hedge"] = args.hedge
         df = pd.read_csv(args.hedge, parse_dates=["date"])
-        df = df[(df["date"] >= h.is_window[0]) & (df["date"] <= h.is_window[1])]
+        df = df[in_window(df["date"], h.is_window)]
         df["z"] = meanrev.zscore(df["spread"], args.window).values
         run = Run(f"meanrev {m}", params, inputs, h.id)
         zp = _write_series(run, df.set_index("date"), "zscore")
@@ -298,7 +298,7 @@ def cmd_momentum(args):
     elif m == "portfolio":
         inputs["signal"] = args.signal
         sig = pd.read_csv(args.signal, parse_dates=["date"])
-        sig = sig[(sig["date"] >= h.is_window[0]) & (sig["date"] <= h.is_window[1])]
+        sig = sig[in_window(sig["date"], h.is_window)]
         liq = None
         if args.min_dollar_volume and "volume" in prices.columns:
             liq = (P * close_matrix(prices, "volume")).rolling(20).mean()
@@ -314,7 +314,7 @@ def cmd_momentum(args):
     elif m == "ic":
         inputs["signal"] = args.signal
         sig = pd.read_csv(args.signal, parse_dates=["date"])
-        sig = sig[(sig["date"] >= h.is_window[0]) & (sig["date"] <= h.is_window[1])]
+        sig = sig[in_window(sig["date"], h.is_window)]
         result = momentum.rank_ic(sig, P, args.horizon, args.step)
         ics = result.pop("series")
         run = Run(f"momentum {m}", params, inputs, h.id)
@@ -360,7 +360,7 @@ def cmd_backtest(args):
 def cmd_costs(args):
     h = _h(args)
     bt = pd.read_csv(args.backtest, parse_dates=["date"], index_col="date")
-    bt = bt[(bt.index >= h.is_window[0]) & (bt.index <= h.is_window[1])]
+    bt = bt[in_window(bt.index, h.is_window)]
     summary = bt_mod.summarize(bt, h.ppy)
     result = {"cost_assumptions": h.spec["costs"], "capital": h.spec["capital"],
               "costs_per_year": summary["costs_per_year"], "turnover_per_year": summary["turnover_per_year"],
@@ -414,7 +414,7 @@ def cmd_validate(args):
             raise ContractError("--oos needs --from <qrkit weights output JSON> (replayed with frozen parameters) "
                                 "or --weights <your engine's weights covering the OOS window>")
         bt, P = _bt(h, wpath, prices)
-        bt = bt[(bt.index >= h.oos_window[0]) & (bt.index <= h.oos_window[1])]
+        bt = bt[in_window(bt.index, h.oos_window)]
         if len(bt) < 20:
             raise ContractError("fewer than 20 OOS periods with positions: check the weights cover the OOS window")
         res = {"oos": validate.oos_result(bt["net"], h.alpha, h.ppy), "summary": bt_mod.summarize(bt, h.ppy, bt_mod.market_proxy(P)),
@@ -429,7 +429,7 @@ def cmd_validate(args):
     if not args.backtest:
         raise ContractError("pass --backtest qr-output/series/backtest-...-returns.csv (or --oos --weights for the one-time OOS run)")
     bt = pd.read_csv(args.backtest, parse_dates=["date"], index_col="date")
-    bt = bt[(bt.index >= h.is_window[0]) & (bt.index <= h.is_window[1])]
+    bt = bt[in_window(bt.index, h.is_window)]
     tc = hyp.trial_count(h.id)
     n_trials = max(tc["strategy_variants"], 1)
     res = {"walk_forward": validate.walk_forward(bt["net"], args.folds, h.ppy),
@@ -445,7 +445,7 @@ def cmd_validate(args):
 def cmd_exposure(args):
     h = _h(args)
     bt = pd.read_csv(args.backtest, parse_dates=["date"], index_col="date")
-    bt = bt[(bt.index >= h.is_window[0]) & (bt.index <= h.is_window[1])]
+    bt = bt[in_window(bt.index, h.is_window)]
     P = close_matrix(_is_prices(h))
     fpath = args.factors or h.data_path("factors")
     F = load_factors(fpath, window=h.is_window) if fpath else None
@@ -459,7 +459,7 @@ def cmd_exposure(args):
 def cmd_red_flags(args):
     h = _h(args)
     bt = pd.read_csv(args.backtest, parse_dates=["date"], index_col="date")
-    bt = bt[(bt.index >= h.is_window[0]) & (bt.index <= h.is_window[1])]
+    bt = bt[in_window(bt.index, h.is_window)]
     delayed = None
     inputs = {"hypothesis": args.hypothesis, "backtest": args.backtest}
     if args.weights:
